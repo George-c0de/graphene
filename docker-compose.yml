@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - db-data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.env
+  web:
+    build: .
+    expose:
+      - 8000
+    restart: always
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media:/app/media
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+      - media:/home/app/web/media
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+volumes:
+  db-data:
+  static_volume:
+  media:
